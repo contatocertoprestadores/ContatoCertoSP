@@ -1,11 +1,11 @@
 {
-  "name": "Contato Certo SP - Seu montador no lugar certo",
+  "name": "Contato Certo SP - Uber Black Premium",
   "short_name": "ContatoCertoSP",
-  "description": "645 cidades SP, 77 m\u00f3veis, pain\u00e9is premium com notifica\u00e7\u00f5es sonoras",
+  "description": "Seu montador no lugar certo - 645 cidades - Estilo Uber Black Premium",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0A2A6B",
-  "theme_color": "#0A2A6B",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
   "orientation": "portrait",
   "icons": [
     {
