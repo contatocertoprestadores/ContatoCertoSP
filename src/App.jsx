@@ -1,6 +1,14 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react'
 
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || ''
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+const supabase = SUPABASE_URL && SUPABASE_KEY ? createClient(SUPABASE_URL, SUPABASE_KEY) : null
+
+
+
 const CIDADES_SP = ["Adamantina","Adolfo","Aguaí","Águas da Prata","Águas de Lindóia","Águas de Santa Bárbara","Águas de São Pedro","Agudos","Alambari","Alfredo Marcondes","Altair","Altinópolis","Alto Alegre","Alumínio","Álvares Florence","Álvares Machado","Álvaro de Carvalho","Alvinlândia","Americana","Américo Brasiliense","Américo de Campos","Amparo","Analândia","Andradina","Angatuba","Anhembi","Anhumas","Aparecida","Aparecida d'Oeste","Apiaí","Araçariguama","Araçatuba","Araçoiaba da Serra","Aramina","Arandu","Arapeí","Araraquara","Araras","Arco-Íris","Arealva","Areias","Areiópolis","Ariranha","Artur Nogueira","Arujá","Aspásia","Assis","Atibaia","Auriflama","Avaí","Avanhandava","Avaré","Bady Bassitt","Balbinos","Bálsamo","Bananal","Barão de Antonina","Barbosa","Bariri","Barra Bonita","Barra do Chapéu","Barra do Turvo","Barretos","Barrinha","Barueri","Bastos","Batatais","Bauru","Bebedouro","Bento de Abreu","Bernardino de Campos","Bertioga","Bilac","Birigui","Biritiba Mirim","Boa Esperança do Sul","Bocaina","Bofete","Boituva","Bom Jesus dos Perdões","Bom Sucesso de Itararé","Borá","Boracéia","Borborema","Borebi","Botucatu","Bragança Paulista","Braúna","Brejo Alegre","Brodowski","Brotas","Buri","Buritama","Buritizal","Cabrália Paulista","Cabreúva","Caçapava","Cachoeira Paulista","Caconde","Cafelândia","Caiabu","Caieiras","Caiuá","Cajamar","Cajati","Cajobi","Cajuru","Campina do Monte Alegre","Campinas","Campo Limpo Paulista","Campos do Jordão","Campos Novos Paulista","Cananéia","Canas","Cândido Mota","Cândido Rodrigues","Canitar","Capão Bonito","Capela do Alto","Capivari","Caraguatatuba","Carapicuíba","Cardoso","Casa Branca","Cássia dos Coqueiros","Castilho","Catanduva","Catiguá","Cedral","Cerqueira César","Cerquilho","Cesário Lange","Charqueada","Chavantes","Clementina","Colina","Colômbia","Conchal","Conchas","Cordeirópolis","Coroados","Coronel Macedo","Corumbataí","Cosmópolis","Cosmorama","Cotia","Cravinhos","Cristais Paulista","Cruzália","Cruzeiro","Cubatão","Cunha","Descalvado","Diadema","Dirce Reis","Divinolândia","Dobrada","Dois Córregos","Dolcinópolis","Dourado","Dracena","Duartina","Dumont","Echaporã","Eldorado","Elias Fausto","Elisiário","Embaúba","Embu das Artes","Embu-Guaçu","Emilianópolis","Engenheiro Coelho","Espírito Santo do Pinhal","Espírito Santo do Turvo","Estiva Gerbi","Estrela do Norte","Estrela d'Oeste","Euclides da Cunha Paulista","Fartura","Fernando Prestes","Fernandópolis","Fernão","Ferraz de Vasconcelos","Flora Rica","Floreal","Flórida Paulista","Florínia","Franca","Francisco Morato","Franco da Rocha","Gabriel Monteiro","Gália","Garça","Gastão Vidigal","Gavião Peixoto","General Salgado","Getulina","Glicério","Guaiçara","Guaimbê","Guaíra","Guapiaçu","Guapiara","Guará","Guaraçaí","Guaraci","Guarani d'Oeste","Guarantã","Guararapes","Guararema","Guaratinguetá","Guareí","Guariba","Guarujá","Guarulhos","Guatapará","Guzolândia","Herculândia","Holambra","Hortolândia","Iacanga","Iacri","Iaras","Ibaté","Ibirá","Ibirarema","Ibitinga","Ibiúna","Icém","Iepê","Igaraçu do Tietê","Igarapava","Igaratá","Iguape","Ilha Comprida","Ilha Solteira","Ilhabela","Indaiatuba","Indiana","Indiaporã","Inúbia Paulista","Ipaussu","Iperó","Ipeúna","Ipiguá","Iporanga","Ipuã","Iracemápolis","Irapuã","Irapuru","Itaberá","Itaí","Itajobi","Itaju","Itanhaém","Itaoca","Itapecerica da Serra","Itapetininga","Itapeva","Itapevi","Itapira","Itapirapuã Paulista","Itápolis","Itaporanga","Itapuí","Itapura","Itaquaquecetuba","Itararé","Itariri","Itatiba","Itatinga","Itirapina","Itirapuã","Itobi","Itu","Itupeva","Ituverava","Jaborandi","Jaboticabal","Jacareí","Jaci","Jacupiranga","Jaguariúna","Jales","Jambeiro","Jandira","Jardinópolis","Jarinu","Jaú","Jeriquara","Joanópolis","João Ramalho","José Bonifácio","Júlio Mesquita","Jumirim","Jundiaí","Junqueirópolis","Juquiá","Juquitiba","Lagoinha","Laranjal Paulista","Lavínia","Lavrinhas","Leme","Lençóis Paulista","Limeira","Lindóia","Lins","Lorena","Lourdes","Louveira","Lucélia","Lucianópolis","Luís Antônio","Luiziânia","Lupércio","Lutécia","Macatuba","Macaubal","Macedônia","Magda","Mairinque","Mairiporã","Manduri","Marabá Paulista","Maracaí","Marapoama","Mariápolis","Marília","Marinópolis","Martinópolis","Matão","Mauá","Mendonça","Meridiano","Mesópolis","Miguelópolis","Mineiros do Tietê","Mira Estrela","Miracatu","Mirandópolis","Mirante do Paranapanema","Mirassol","Mirassolândia","Mococa","Mogi das Cruzes","Mogi Guaçu","Mogi Mirim","Mombuca","Monções","Mongaguá","Morro Agudo","Morungaba","Motuca","Murutinga do Sul","Nantes","Narandiba","Natividade da Serra","Nazaré Paulista","Neves Paulista","Nhandeara","Nipoã","Nova Aliança","Nova Campina","Nova Canaã Paulista","Nova Castilho","Nova Europa","Nova Granada","Nova Guataporanga","Nova Independência","Nova Luzitânia","Nova Odessa","Novais","Novo Horizonte","Nuporanga","Ocauçu","Óleo","Olímpia","Onda Verde","Oriente","Orindiúva","Orlândia","Osasco","Oscar Bressane","Osvaldo Cruz","Ourinhos","Ouro Verde","Ouroeste","Pacaembu","Palestina","Palmares Paulista","Palmeira d'Oeste","Palmital","Panorama","Paraguaçu Paulista","Paraibuna","Paraíso","Paranapanema","Paranapuã","Parapuã","Pardinho","Pariquera-Açu","Parisi","Patrocínio Paulista","Paulicéia","Paulínia","Paulistânia","Paulo de Faria","Pederneiras","Pedra Bela","Pedranópolis","Pedregulho","Pedreira","Pedrinhas Paulista","Pedro de Toledo","Penápolis","Pereira","Pereiras","Peruíbe","Piacatu","Piedade","Pilar do Sul","Pindamonhangaba","Pindorama","Pinhalzinho","Piquerobi","Piquete","Piracaia","Piracicaba","Piraju","Pirajuí","Pirangi","Pirapora do Bom Jesus","Pirapozinho","Pirassununga","Piratininga","Pitangueiras","Planalto","Platina","Poá","Poloni","Pompéia","Pongaí","Pontal","Pontalinda","Pontes Gestal","Populina","Porangaba","Porto Feliz","Porto Ferreira","Potim","Potirendaba","Pracinha","Pradópolis","Praia Grande","Pratânia","Presidente Alves","Presidente Bernardes","Presidente Epitácio","Presidente Prudente","Presidente Venceslau","Promissão","Quatá","Queiroz","Queluz","Quintana","Rafard","Rancharia","Redenção da Serra","Regente Feijó","Reginópolis","Registro","Restinga","Ribeira","Ribeirão Bonito","Ribeirão Branco","Ribeirão Corrente","Ribeirão do Sul","Ribeirão dos Índios","Ribeirão Grande","Ribeirão Pires","Ribeirão Preto","Riversul","Rifaina","Rincão","Rinópolis","Rio Claro","Rio das Pedras","Rio Grande da Serra","Riolândia","Rosana","Roseira","Rubiácea","Rubinéia","Sabino","Sagres","Sales","Sales Oliveira","Salesópolis","Salmourão","Saltinho","Salto","Salto de Pirapora","Salto Grande","Sandovalina","Santa Adélia","Santa Albertina","Santa Bárbara d'Oeste","Santa Branca","Santa Clara d'Oeste","Santa Cruz da Conceição","Santa Cruz da Esperança","Santa Cruz das Palmeiras","Santa Cruz do Rio Pardo","Santa Ernestina","Santa Fé do Sul","Santa Gertrudes","Santa Isabel","Santa Lúcia","Santa Maria da Serra","Santa Mercedes","Santa Rita do Passa Quatro","Santa Rita d'Oeste","Santa Rosa de Viterbo","Santa Salete","Santana da Ponte Pensa","Santana de Parnaíba","Santo Anastácio","Santo André","Santo Antônio da Alegria","Santo Antônio de Posse","Santo Antônio do Aracanguá","Santo Antônio do Jardim","Santo Antônio do Pinhal","Santo Expedito","Santópolis do Aguapeí","Santos","São Bento do Sapucaí","São Bernardo do Campo","São Caetano do Sul","São Carlos","São Francisco","São João da Boa Vista","São João das Duas Pontes","São João de Iracema","São João do Pau d'Alho","São Joaquim da Barra","São José da Bela Vista","São José do Barreiro","São José do Rio Pardo","São José do Rio Preto","São José dos Campos","São Lourenço da Serra","São Luís do Paraitinga","São Manuel","São Miguel Arcanjo","São Paulo","São Pedro","São Pedro do Turvo","São Roque","São Sebastião","São Sebastião da Grama","São Simão","São Vicente","Sarapuí","Sarutaiá","Sebastianópolis do Sul","Serra Azul","Serra Negra","Serrana","Sertãozinho","Sete Barras","Severínia","Silveiras","Socorro","Sorocaba","Sud Mennucci","Sumaré","Suzanápolis","Suzano","Tabapuã","Tabatinga","Taboão da Serra","Taciba","Taguaí","Taiaçu","Taiúva","Tambaú","Tanabi","Tapiraí","Tapiratiba","Taquaral","Taquaritinga","Taquarituba","Taquarivaí","Tarabai","Tarumã","Tatuí","Taubaté","Tejupá","Teodoro Sampaio","Terra Roxa","Tietê","Timburi","Torre de Pedra","Torrinha","Trabiju","Tremembé","Três Fronteiras","Tuiuti","Tupã","Tupi Paulista","Turiúba","Turmalina","Ubarana","Ubatuba","Ubirajara","Uchoa","União Paulista","Urânia","Uru","Urupês","Valentim Gentil","Valinhos","Valparaíso","Vargem","Vargem Grande do Sul","Vargem Grande Paulista","Várzea Paulista","Vera Cruz","Vinhedo","Viradouro","Vista Alegre do Alto","Vitória Brasil","Votorantim","Votuporanga","Zacarias"]
 
 const CATALOGO = [
@@ -38,7 +46,22 @@ export default function App(){
   const [pedidos, setPedidos] = useState(()=>{ try{ const s=localStorage.getItem('ccsp_pedidos'); return s? JSON.parse(s): [] }catch{ return [] } })
   const [cupons, setCupons] = useState(()=>{ try{ const s=localStorage.getItem('ccsp_cupons'); return s? JSON.parse(s): [] }catch{ return [] } })
   const [currentUser, setCurrentUser] = useState(()=>{ try{ const s=localStorage.getItem('ccsp_user'); return s? JSON.parse(s): null }catch{ return null } })
-  const [view, setView] = useState('home')
+  const [view, setView] = useState(()=>{
+    try{
+      const saved = localStorage.getItem('ccsp_view')
+      const userStr = localStorage.getItem('ccsp_user')
+      if(saved && userStr){
+        const u = JSON.parse(userStr)
+        // validar se view salva bate com tipo do usuário
+        if(u && (saved==='cliente' && u.tipo==='CLIENTE' || saved==='montador' && u.tipo==='MONTADOR' || saved==='admin' && u.tipo==='ADMIN')) return saved
+        // se não bate, corrigir baseado no tipo
+        if(u.tipo==='CLIENTE') return 'cliente'
+        if(u.tipo==='MONTADOR') return 'montador'
+        if(u.tipo==='ADMIN') return 'admin'
+      }
+      return 'home'
+    }catch{ return 'home' }
+  })
   const [tab, setTab] = useState('pendentes')
   const [selectedMovel, setSelectedMovel] = useState(null)
   const [servicoTipo, setServicoTipo] = useState('')
@@ -58,6 +81,15 @@ export default function App(){
   useEffect(()=>{ localStorage.setItem('ccsp_pedidos', JSON.stringify(pedidos)) },[pedidos])
   useEffect(()=>{ localStorage.setItem('ccsp_cupons', JSON.stringify(cupons)) },[cupons])
   useEffect(()=>{ if(currentUser) localStorage.setItem('ccsp_user', JSON.stringify(currentUser)); else localStorage.removeItem('ccsp_user') },[currentUser])
+  useEffect(()=>{ localStorage.setItem('ccsp_view', view) },[view])
+  // Restaurar painel após refresh
+  useEffect(()=>{
+    if(currentUser && view==='home'){
+      if(currentUser.tipo==='CLIENTE') setView('cliente')
+      else if(currentUser.tipo==='MONTADOR') setView('montador')
+      else if(currentUser.tipo==='ADMIN') setView('admin')
+    }
+  },[]) // roda só no mount
 
   function showToast(msg){ setToast(msg); setTimeout(()=>setToast(null),3500) }
 
@@ -77,35 +109,134 @@ export default function App(){
     }catch(e){}
   }
 
+  // REALTIME ONLINE REAL - Montadores veem pedidos em tempo real
   useEffect(()=>{
-    const ch = new BroadcastChannel('ccsp_realtime')
-    ch.onmessage = (e)=>{
-      const data = e.data
-      if(data.type==='pedido_novo' && currentUser && currentUser.tipo==='MONTADOR' && currentUser.status_disponivel){
-        if(data.cidade===currentUser.cidade_atende){ showToast('🔔 Novo pedido em '+data.cidade+'!'); playSound('new') }
-        setPedidos(prev=>{ const exists = prev.find(p=>p.id===data.pedido.id); return exists? prev : [...prev, data.pedido] })
-      }
-      if(data.type==='pedido_aceito' && currentUser && currentUser.tipo==='CLIENTE'){
-        if(data.pedido.cliente_id===currentUser.id){ showToast('✅ Seu pedido #'+data.pedido.numero+' foi aceito!'); playSound('accept') }
-        setPedidos(prev=> prev.map(p=> p.id===data.pedido.id ? data.pedido : p))
-      }
-    }
-    return ()=> ch.close()
-  },[currentUser])
-
-  useEffect(()=>{
-    const id = setInterval(()=>{
-      if(pedidos.length>lastCount.current){
-        if(currentUser && currentUser.tipo==='MONTADOR' && currentUser.status_disponivel){
-          const novos = pedidos.slice(lastCount.current)
-          const match = novos.find(p=>p.cidade===currentUser.cidade_atende)
-          if(match){ showToast('🔔 Novo pedido em '+match.cidade); playSound('new') }
+    // Fallback local sempre ativo
+    let bcChannel = null
+    try{
+      bcChannel = new BroadcastChannel('ccsp_realtime')
+      bcChannel.onmessage = (e)=>{
+        const data = e.data
+        if(data.type==='pedido_novo'){
+          setPedidos(prev=>{ const exists = prev.find(p=>p.id===data.pedido.id); return exists? prev : [data.pedido, ...prev] })
+          if(currentUser && currentUser.tipo==='MONTADOR' && currentUser.status_disponivel && data.cidade===currentUser.cidade_atende){
+            showToast('🔔 Novo pedido em '+data.cidade+'! #'+data.pedido.numero); playSound('new')
+          }
+        }
+        if(data.type==='pedido_aceito'){
+          setPedidos(prev=> prev.map(p=> p.id===data.pedido.id ? data.pedido : p))
+          if(currentUser && currentUser.tipo==='CLIENTE' && data.pedido.cliente_id===currentUser.id){
+            showToast('✅ Seu pedido #'+data.pedido.numero+' foi aceito!'); playSound('accept')
+          }
         }
       }
-      lastCount.current = pedidos.length
-    },3000)
-    return ()=> clearInterval(id)
-  },[pedidos, currentUser])
+    }catch(e){}
+
+    // Supabase Realtime - ONLINE REAL entre celulares diferentes
+    let sbChannel = null
+    if(supabase){
+      async function loadPedidosSupabase(){
+        try{
+          const {data, error} = await supabase.from('pedidos').select('*').order('created_at',{ascending:false}).limit(200)
+          if(error) console.log('load pedidos erro', error)
+          if(data && data.length>0){
+            setPedidos(prev=> {
+              const mergedMap = new Map()
+              // primeiro supabase (fonte da verdade)
+              data.forEach(p=> mergedMap.set(p.id, p))
+              // depois locais que ainda não estão no supabase (AGUARDANDO_PAGAMENTO etc)
+              prev.forEach(lp=>{
+                if(!mergedMap.has(lp.id)) mergedMap.set(lp.id, lp)
+              })
+              return Array.from(mergedMap.values()).sort((a,b)=> new Date(b.created_at) - new Date(a.created_at))
+            })
+          }
+        }catch(err){ console.log(err) }
+      }
+      loadPedidosSupabase()
+
+      // Escutar INSERT e UPDATE em tempo real - sem filtro de cidade no canal (filtro faz no cliente)
+      sbChannel = supabase.channel('pedidos-realtime-v2')
+        .on('postgres_changes',{event:'INSERT', schema:'public', table:'pedidos'}, payload=>{
+          const novo = payload.new
+          console.log('Realtime INSERT', novo)
+          setPedidos(prev=> {
+            if(prev.find(p=>p.id===novo.id)) return prev
+            return [novo, ...prev]
+          })
+        })
+        .on('postgres_changes',{event:'UPDATE', schema:'public', table:'pedidos'}, payload=>{
+          const atualizado = payload.new
+          console.log('Realtime UPDATE', atualizado)
+          setPedidos(prev=> prev.map(p=> p.id===atualizado.id ? atualizado : p))
+        })
+        .subscribe((status)=>{
+          console.log('Supabase realtime status', status)
+        })
+
+      // Polling fallback a cada 5s caso realtime falhe (RLS ou rede)
+      const poll = setInterval(async ()=>{
+        try{
+          const {data} = await supabase.from('pedidos').select('*').eq('status','PROCURANDO_MONTADOR').order('created_at',{ascending:false}).limit(50)
+          if(data){
+            setPedidos(prev=>{
+              const map = new Map(prev.map(p=>[p.id,p]))
+              let mudou=false
+              data.forEach(p=>{
+                if(!map.has(p.id)){ map.set(p.id,p); mudou=true }
+              })
+              if(mudou){
+                // se tem novo pedido para este montador, tocar som
+                if(currentUser && currentUser.tipo==='MONTADOR' && currentUser.status_disponivel){
+                  const novosParaMim = data.filter(p=> p.cidade===currentUser.cidade_atende && !prev.find(pr=>pr.id===p.id))
+                  if(novosParaMim.length>0){ showToast('🔔 '+novosParaMim.length+' novo(s) pedido(s) em '+currentUser.cidade_atende); playSound('new') }
+                }
+                return Array.from(map.values()).sort((a,b)=> new Date(b.created_at)-new Date(a.created_at))
+              }
+              return prev
+            })
+          }
+        }catch(e){}
+      },5000)
+
+      return ()=> { 
+        if(bcChannel) bcChannel.close()
+        if(sbChannel) supabase.removeChannel(sbChannel)
+        clearInterval(poll)
+      }
+    }
+
+    return ()=> { if(bcChannel) bcChannel.close() }
+  },[]) // sem depender de currentUser para não recriar canal
+
+  // Efeito separado só para notificações sonoras quando pedidos mudam
+  useEffect(()=>{
+    if(!currentUser || currentUser.tipo!=='MONTADOR' || !currentUser.status_disponivel) return
+    if(pedidos.length>lastCount.current){
+      const novos = pedidos.slice(0, pedidos.length-lastCount.current)
+      const match = novos.find(p=>p.cidade===currentUser.cidade_atende && p.status==='PROCURANDO_MONTADOR')
+      if(match){ showToast('🔔 Novo pedido em '+match.cidade+'! #'+match.numero); playSound('new') }
+    }
+    lastCount.current = pedidos.length
+  },[pedidos])
+
+  useEffect(()=>{
+    // Notificação para cliente quando pedido aceito
+    if(!currentUser || currentUser.tipo!=='CLIENTE') return
+    const aceitos = pedidos.filter(p=> p.cliente_id===currentUser.id && p.status==='ACEITO')
+    // se tiver algum aceito recentemente, notificar (evita spam usando sessionStorage)
+    aceitos.forEach(p=>{
+      const key='notified_'+p.id
+      if(!sessionStorage.getItem(key)){
+        showToast('✅ Seu pedido #'+p.numero+' foi aceito por '+p.montador_nome+'!')
+        playSound('accept')
+        sessionStorage.setItem(key,'1')
+      }
+    })
+  },[pedidos])
+
+
+
 
   const filteredCatalog = useMemo(()=>{
     let list = [...CATALOGO]
@@ -114,7 +245,7 @@ export default function App(){
     return list
   },[filtroCat, busca])
 
-  function handleCadastro(e){
+  async function handleCadastro(e){
     e.preventDefault()
     const fd = new FormData(e.target)
     const nome = fd.get('nome')
@@ -124,16 +255,32 @@ export default function App(){
     const telefone = fd.get('telefone') || ''
     const cidade_atende = fd.get('cidade_atende') || ''
     const chave_pix = fd.get('chave_pix') || ''
-    if(usuarios.find(u=>u.email===email)){ showToast('E-mail já cadastrado'); return }
+    const emailNorm = email.toLowerCase().trim()
+    const telNorm = telefone.replace(/\D/g,'')
+    if(usuarios.find(u=>u.email.toLowerCase().trim()===emailNorm)){ showToast('❌ E-mail já cadastrado'); return }
+    if(telNorm && usuarios.find(u=>{ const t=(u.telefone||'').replace(/\D/g,''); return t && t===telNorm })){ showToast('❌ Telefone/WhatsApp já cadastrado'); return }
+    if(supabase){
+      try{
+        const {data:exEmail} = await supabase.from('usuarios').select('id').ilike('email', emailNorm).limit(1)
+        if(exEmail && exEmail.length>0){ showToast('❌ E-mail já existe no banco'); return }
+        if(telNorm){
+          const {data:exTel} = await supabase.from('usuarios').select('id').eq('telefone', telefone).limit(1)
+          // checagem adicional por telefone normalizado será feita no app, mas no banco verifica exato
+        }
+      }catch(e){}
+    }
     if(cadTipo==='MONTADOR'){
       if(!cidade_atende){ showToast('Cidade que atende obrigatória'); return }
       if(!chave_pix){ showToast('Chave PIX obrigatória'); return }
       if(!fotoPerfilTmp){ showToast('Foto de perfil obrigatória'); return }
     }
-    const novo = {id:Date.now().toString(), tipo:cadTipo, nome, email, senha, cidade, cidade_atende, telefone, chave_pix, foto_perfil:fotoPerfilTmp, status:'ATIVO', status_disponivel:true}
+    const novo = {id:Date.now().toString(), tipo:cadTipo, nome, email:emailNorm, email_original:email, telefone, telefone_norm:telNorm, senha, cidade, cidade_atende, telefone, chave_pix, foto_perfil:fotoPerfilTmp, status:'ATIVO', status_disponivel:true}
     setUsuarios([...usuarios, novo])
+    if(supabase){
+      try{ await supabase.from('usuarios').insert([{id:novo.id, tipo:cadTipo, nome, email:emailNorm, telefone, senha, cidade, cidade_atende, chave_pix, foto_perfil:fotoPerfilTmp, status:'ATIVO', status_disponivel:true}]) }catch(e){ console.log('supabase usuario erro', e) }
+    }
     setFotoPerfilTmp('')
-    showToast('Cadastro realizado! Faça login')
+    showToast('✅ Cadastro realizado! Faça login')
     setView('login')
   }
 
@@ -158,7 +305,7 @@ export default function App(){
     showToast('Bem-vindo '+u.nome)
   }
 
-  function criarPedido(){
+  async function criarPedido(){
     if(!selectedMovel || !servicoTipo){ showToast('Selecione serviço'); return }
     if(!formData.cidade){ showToast('Informe cidade'); return }
     if(!currentUser){ showToast('Faça login'); setView('login'); return }
@@ -171,32 +318,32 @@ export default function App(){
     setFormFotos([])
     setView('pagamento')
     showToast('Pedido #'+pedido.numero+' criado!')
+    // Salvar no Supabase para realtime real
+    if(supabase){
+      try{ await supabase.from('pedidos').insert([pedido]) }catch(e){ console.log('supabase insert erro', e) }
+    }
   }
 
-  function confirmarPagamentoEnvio(){
+  async function confirmarPagamentoEnvio(){
     if(!pedidoEmPagamento) return
     const atual = {...pedidoEmPagamento, status:'COMPROVANTE_ENVIADO'}
     const msg = 'Olá! Enviando comprovante pedido Nº '+atual.numero+'. Cliente: '+atual.cliente_nome+' Serviço: '+atual.movel_nome+' - '+atual.servico_label+' Valor: '+atual.valor_txt+' Cidade: '+atual.cidade
     window.open('https://wa.me/'+WHATSAPP+'?text='+encodeURIComponent(msg),'_blank')
     const novos = pedidos.map(p=> p.id===atual.id ? {...p, status:'PROCURANDO_MONTADOR'} : p)
     setPedidos(novos)
-    const ch = new BroadcastChannel('ccsp_realtime')
-    ch.postMessage({type:'pedido_novo', pedido:{...atual, status:'PROCURANDO_MONTADOR'}, cidade:atual.cidade})
-    ch.close()
+    if(supabase){ try{ await supabase.from('pedidos').update({status:'PROCURANDO_MONTADOR'}).eq('id', atual.id) }catch(e){} } else { const ch = new BroadcastChannel('ccsp_realtime'); ch.postMessage({type:'pedido_novo', pedido:{...atual, status:'PROCURANDO_MONTADOR'}, cidade:atual.cidade}); ch.close() }
     showToast('Comprovante enviado! Pedido liberado para montadores')
     setView('cliente')
   }
 
-  function aceitarPedido(pedidoId){
+  async function aceitarPedido(pedidoId){
     const p = pedidos.find(x=>x.id===pedidoId)
     if(!p){ showToast('Pedido não encontrado'); return }
     if(p.status!=='PROCURANDO_MONTADOR'){ showToast('Este serviço acabou de ser aceito por outro montador.'); setPedidos([...pedidos]); return }
     const novo = {...p, status:'ACEITO', montador_id:currentUser.id, montador_nome:currentUser.nome}
     const novos = pedidos.map(x=> x.id===pedidoId ? novo : x)
     setPedidos(novos)
-    const ch = new BroadcastChannel('ccsp_realtime')
-    ch.postMessage({type:'pedido_aceito', pedido:novo})
-    ch.close()
+    if(supabase){ try{ await supabase.from('pedidos').update({status:'ACEITO', montador_id:currentUser.id, montador_nome:currentUser.nome}).eq('id', pedidoId) }catch(e){} } else { const ch = new BroadcastChannel('ccsp_realtime'); ch.postMessage({type:'pedido_aceito', pedido:novo}); ch.close() }
     showToast('Pedido aceito!'); playSound('accept')
   }
 
