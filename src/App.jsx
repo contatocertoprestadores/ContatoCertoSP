@@ -113,21 +113,21 @@ export default function App(){
   const [filtroCat, setFiltroCat] = useState('Todos');
   const [pedidoEmPagamento, setPedidoEmPagamento] = useState(null);
   const [busca, setBusca] = useState('');
-  const [formFotos, setFormFotos] = useState([][]);
+  const [formFotos, setFormFotos] = useState([]);
   const [formData, setFormData] = useState({bairro:'', data:'', horario:'', cidade:'', servico:'montagem', cupom:''});
   const [fotoPerfilTmp, setFotoPerfilTmp] = useState('');
   const channelRef = useRef(null);
   const lastPedidosCount = useRef(pedidos.length);
   const audioCtxRef = useRef(null);
 
-  const showToast = (msg:any)=>{ setToast(msg); setTimeout(()=>setToast(null),3800); };
+  const showToast = (msg)=>{ setToast(msg); setTimeout(()=>setToast(null),3800); };
 
   const playNotification = (type='new')=>{
     try{
       if(!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext||(window).webkitAudioContext)();
       const ctx = audioCtxRef.current;
       if(ctx.state==='suspended') ctx.resume();
-      const playTone = (freq:any,dur:any,delay=0)=>{
+      const playTone = (freq,dur,delay=0)=>{
         setTimeout(()=>{
           const o = ctx.createOscillator(); const g = ctx.createGain();
           o.type='sine'; o.frequency.value=freq;
@@ -160,16 +160,16 @@ export default function App(){
   useEffect(()=>{
     try{
       channelRef.current = new BroadcastChannel('ccsp_realtime');
-      channelRef.current.onmessage = (e:any)=>{
+      channelRef.current.onmessage = (e)=>{
         const {type, data} = e.data||{};
         if(type==='pedido_novo'){
-          setPedidos((prev:any)=>{ if(prev.find((p:any)=>p.id===data.id)) return prev; return [data, ...prev]; });
+          setPedidos((prev)=>{ if(prev.find((p)=>p.id===data.id)) return prev; return [data, ...prev]; });
           if(currentUser?.tipo==='montador' && currentUser.status_disponivel && currentUser.cidade_atende===data.cidade){
             playNotification('new'); showToast(`🔔 Novo pedido em ${data.cidade}!`);
           }
         }
         if(type==='pedido_aceito'){
-          setPedidos((prev:any)=> prev.map((p:any)=> p.id===data.id? data : p));
+          setPedidos((prev)=> prev.map((p)=> p.id===data.id? data : p));
           if(currentUser?.tipo==='cliente' && data.cliente_id===currentUser.id){
             playNotification('accept'); showToast(`✅ Seu pedido #${data.numero} foi aceito por ${data.montador_nome||'montador'}!`);
           }
@@ -178,7 +178,7 @@ export default function App(){
           }
         }
         if(type==='pedido_update'){
-          setPedidos((prev:any)=> prev.map((p:any)=> p.id===data.id? data : p));
+          setPedidos((prev)=> prev.map((p)=> p.id===data.id? data : p));
         }
       };
     }catch{}
@@ -189,7 +189,7 @@ export default function App(){
     const id = setInterval(()=>{
       if(pedidos.length > lastPedidosCount.current){
         const novos = pedidos.slice(0, pedidos.length - lastPedidosCount.current);
-        novos.forEach((n:any)=>{
+        novos.forEach((n)=>{
           if(currentUser?.tipo==='montador' && currentUser.status_disponivel && currentUser.cidade_atende===n.cidade){
             playNotification('new'); showToast(`🔔 Novo pedido em ${n.cidade}!`);
           }
@@ -207,12 +207,12 @@ export default function App(){
     return list;
   },[filtroCat, busca]);
 
-  const handleCadastro = (e:any)=>{
+  const handleCadastro = (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
     const nome = fd.get('nome'); const email=fd.get('email'); const senha=fd.get('senha'); const cidade=fd.get('cidade'); const telefone=fd.get('telefone');
     const cidade_atende = fd.get('cidade_atende')||''; const chave_pix=fd.get('chave_pix')||'';
-    if(usuarios.find((u:any)=>u.email===email)){ showToast('E-mail já cadastrado'); return; }
+    if(usuarios.find((u)=>u.email===email)){ showToast('E-mail já cadastrado'); return; }
     if(cadTipo==='montador' && !cidade_atende){ showToast('Cidade que atende obrigatória'); return; }
     if(cadTipo==='montador' && !chave_pix){ showToast('Chave PIX obrigatória em nome próprio'); return; }
     const novo = {id:'u'+Date.now(), tipo:cadTipo, nome, email, senha, cidade, cidade_atende: cadTipo==='montador'? cidade_atende: '', chave_pix, foto_perfil: fotoPerfilTmp||'', status:'ATIVO', status_disponivel:true, telefone};
@@ -222,11 +222,11 @@ export default function App(){
     setView('login');
   };
 
-  const handleLogin = (e:any)=>{
+  const handleLogin = (e)=>{
     e.preventDefault();
     const fd = new FormData(e.target);
     const email=fd.get('email'); const senha=fd.get('senha');
-    const user = usuarios.find((u:any)=>u.email===email && u.senha===senha);
+    const user = usuarios.find((u)=>u.email===email && u.senha===senha);
     if(!user){ showToast('Credenciais inválidas'); return; }
     if(user.status==='BLOQUEADO'){ showToast('Usuário bloqueado. Contate suporte.'); return; }
     setCurrentUser(user);
@@ -240,7 +240,7 @@ export default function App(){
     if(!selectedMovel) return;
     const valorBase = selectedMovel.valores[formData.servico];
     let valorBruto = valorBase;
-    const cup = cupons.find((c:any)=>c.codigo.toLowerCase()===formData.cupom.toLowerCase());
+    const cup = cupons.find((c)=>c.codigo.toLowerCase()===formData.cupom.toLowerCase());
     if(cup){ if(cup.tipo==='%') valorBruto = Math.round(valorBruto*(1-cup.desconto/100)); else valorBruto = Math.max(0, valorBruto-cup.desconto); }
     const comissao = Math.round(valorBruto*0.10);
     const valorLiquido = valorBruto - comissao;
@@ -261,37 +261,37 @@ export default function App(){
     playNotification('new');
   };
 
-  const confirmarPagamento = (pedidoId:any)=>{
-    const upd = pedidos.map((p:any)=> p.id===pedidoId? {...p, status:'COMPROVANTE_ENVIADO'}:p);
+  const confirmarPagamento = (pedidoId)=>{
+    const upd = pedidos.map((p)=> p.id===pedidoId? {...p, status:'COMPROVANTE_ENVIADO'}:p);
     setPedidos(upd);
     setTimeout(()=>{
-      setPedidos((prev:any)=> prev.map((p:any)=> p.id===pedidoId? {...p, status:'PROCURANDO_MONTADOR'}:p));
-      const ped = upd.find((x:any)=>x.id===pedidoId); if(ped){ const np={...ped, status:'PROCURANDO_MONTADOR'}; try{ channelRef.current?.postMessage({type:'pedido_novo', data:np}); }catch{} }
+      setPedidos((prev)=> prev.map((p)=> p.id===pedidoId? {...p, status:'PROCURANDO_MONTADOR'}:p));
+      const ped = upd.find((x)=>x.id===pedidoId); if(ped){ const np={...ped, status:'PROCURANDO_MONTADOR'}; try{ channelRef.current?.postMessage({type:'pedido_novo', data:np}); }catch{} }
       showToast('Pagamento confirmado! Procurando montador...');
       playNotification('accept');
     },800);
   };
 
-  const aceitarPedido = (ped:any)=>{
-    const atual = pedidos.find((p:any)=>p.id===ped.id);
+  const aceitarPedido = (ped)=>{
+    const atual = pedidos.find((p)=>p.id===ped.id);
     if(!atual || (atual.status!=='PROCURANDO_MONTADOR' && atual.status!=='COMPROVANTE_ENVIADO')){ showToast('Este serviço acabou de ser aceito por outro montador.'); return; }
     if(!currentUser.status_disponivel){ showToast('Fique Disponível para aceitar.'); return; }
     const novo = {...atual, status:'ACEITO', montador_id:currentUser.id, montador_nome:currentUser.nome};
-    setPedidos((prev:any)=> prev.map((p:any)=>p.id===ped.id? novo: p));
+    setPedidos((prev)=> prev.map((p)=>p.id===ped.id? novo: p));
     try{ channelRef.current?.postMessage({type:'pedido_aceito', data:novo}); }catch{}
     showToast(`Pedido #${novo.numero} aceito!`);
     playNotification('accept');
   };
 
-  const recusarPedido = (ped:any)=>{
+  const recusarPedido = (ped)=>{
     showToast('Pedido recusado.');
     playNotification('new');
   };
 
-  const finalizarPedido = (pedId:any)=>{
-    const novo = pedidos.map((p:any)=> p.id===pedId? {...p, status:'FINALIZADO'}:p);
+  const finalizarPedido = (pedId)=>{
+    const novo = pedidos.map((p)=> p.id===pedId? {...p, status:'FINALIZADO'}:p);
     setPedidos(novo);
-    const ped = novo.find((x:any)=>x.id===pedId);
+    const ped = novo.find((x)=>x.id===pedId);
     try{ channelRef.current?.postMessage({type:'pedido_update', data:ped}); }catch{}
     showToast('Pedido finalizado!');
     playNotification('accept');
@@ -300,12 +300,12 @@ export default function App(){
   const toggleDisponivel = ()=>{
     const updUser = {...currentUser, status_disponivel:!currentUser.status_disponivel};
     setCurrentUser(updUser);
-    setUsuarios((prev:any)=> prev.map((u:any)=> u.id===currentUser.id? updUser: u));
+    setUsuarios((prev)=> prev.map((u)=> u.id===currentUser.id? updUser: u));
     playNotification(updUser.status_disponivel?'accept':'new');
   };
 
   const handleLogoClick = ()=>{
-    setLogoTaps((prev:any)=>{
+    setLogoTaps((prev)=>{
       const next = prev+1;
       if(next>=5){ setView('adminLogin'); return 0; }
       return next;
@@ -315,41 +315,41 @@ export default function App(){
 
   const clienteFinanceiro = useMemo(()=>{
     if(!currentUser) return {total:0, pago:0, pendente:0, pendCount:0, finalCount:0};
-    const meus = pedidos.filter((p:any)=>p.cliente_id===currentUser.id);
-    const total = meus.reduce((s:any,p:any)=>s+p.valor_bruto,0);
-    const pago = meus.filter((p:any)=>['FINALIZADO','ACEITO','PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status)).reduce((s:any,p:any)=>s+p.valor_bruto,0);
+    const meus = pedidos.filter((p)=>p.cliente_id===currentUser.id);
+    const total = meus.reduce((s,p)=>s+p.valor_bruto,0);
+    const pago = meus.filter((p)=>['FINALIZADO','ACEITO','PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status)).reduce((s,p)=>s+p.valor_bruto,0);
     const pendente = total - pago;
-    const pendCount = meus.filter((p:any)=>['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).length;
-    const finalCount = meus.filter((p:any)=>p.status==='FINALIZADO').length;
+    const pendCount = meus.filter((p)=>['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).length;
+    const finalCount = meus.filter((p)=>p.status==='FINALIZADO').length;
     return {total, pago, pendente, pendCount, finalCount};
   },[pedidos, currentUser]);
 
   const montadorFinanceiro = useMemo(()=>{
     if(!currentUser) return {realizado:0, aReceber:0, total:0, lista:[], disponiveis:0, aceitos:0, finalizados:0};
-    const meus = pedidos.filter((p:any)=>p.montador_id===currentUser.id);
-    const realizado = meus.filter((p:any)=>p.status==='FINALIZADO').reduce((s:any,p:any)=>s+p.valor_liquido,0);
-    const aReceber = meus.filter((p:any)=>p.status==='ACEITO').reduce((s:any,p:any)=>s+p.valor_liquido,0);
-    const disponiveis = pedidos.filter((p:any)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).length;
-    return {realizado, aReceber, total:realizado+aReceber, lista:meus, disponiveis, aceitos:meus.filter((p:any)=>p.status==='ACEITO').length, finalizados:meus.filter((p:any)=>p.status==='FINALIZADO').length};
+    const meus = pedidos.filter((p)=>p.montador_id===currentUser.id);
+    const realizado = meus.filter((p)=>p.status==='FINALIZADO').reduce((s,p)=>s+p.valor_liquido,0);
+    const aReceber = meus.filter((p)=>p.status==='ACEITO').reduce((s,p)=>s+p.valor_liquido,0);
+    const disponiveis = pedidos.filter((p)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).length;
+    return {realizado, aReceber, total:realizado+aReceber, lista:meus, disponiveis, aceitos:meus.filter((p)=>p.status==='ACEITO').length, finalizados:meus.filter((p)=>p.status==='FINALIZADO').length};
   },[pedidos, currentUser]);
 
   const adminFinanceiro = useMemo(()=>{
     const now = new Date(); const mes = now.getMonth(); const ano=now.getFullYear();
-    const doMes = pedidos.filter((p:any)=>{ const d=new Date(p.created_at); return d.getMonth()===mes && d.getFullYear()===ano; });
-    const totalPedidosMes = doMes.reduce((s:any,p:any)=>s+p.valor_bruto,0);
-    const finalizadosMes = doMes.filter((p:any)=>p.status==='FINALIZADO');
-    const totalRepasseMes = finalizadosMes.reduce((s:any,p:any)=>s+p.valor_liquido,0);
-    const pendenteRepasse = pedidos.filter((p:any)=>p.status==='ACEITO').reduce((s:any,p:any)=>s+p.valor_liquido,0);
-    const comissaoMes = doMes.reduce((s:any,p:any)=>s+p.comissao,0);
+    const doMes = pedidos.filter((p)=>{ const d=new Date(p.created_at); return d.getMonth()===mes && d.getFullYear()===ano; });
+    const totalPedidosMes = doMes.reduce((s,p)=>s+p.valor_bruto,0);
+    const finalizadosMes = doMes.filter((p)=>p.status==='FINALIZADO');
+    const totalRepasseMes = finalizadosMes.reduce((s,p)=>s+p.valor_liquido,0);
+    const pendenteRepasse = pedidos.filter((p)=>p.status==='ACEITO').reduce((s,p)=>s+p.valor_liquido,0);
+    const comissaoMes = doMes.reduce((s,p)=>s+p.comissao,0);
     const porMontador = {};
-    pedidos.filter((p:any)=>p.status==='ACEITO').forEach((p:any)=>{ if(!porMontador[p.montador_id]) porMontador[p.montador_id]={nome:p.montador_nome, total:0, count:0}; porMontador[p.montador_id].total+=p.valor_liquido; porMontador[p.montador_id].count++; });
+    pedidos.filter((p)=>p.status==='ACEITO').forEach((p)=>{ if(!porMontador[p.montador_id]) porMontador[p.montador_id]={nome:p.montador_nome, total:0, count:0}; porMontador[p.montador_id].total+=p.valor_liquido; porMontador[p.montador_id].count++; });
     return {totalPedidosMes, totalRepasseMes, pendenteRepasse, comissaoMes, porMontador, countMes:doMes.length};
   },[pedidos]);
 
   const clienteChart = useMemo(()=>{
     const months = ["Jan","Fev","Mar","Abr","Mai","Jun"];
-    const meus = pedidos.filter((p:any)=>p.cliente_id===currentUser?.id);
-    const values = months.map((_,i)=>{ return meus.slice(i, i+2).reduce((s:any,p:any)=>s+p.valor_bruto,0) || Math.round(Math.random()*80+20); });
+    const meus = pedidos.filter((p)=>p.cliente_id===currentUser?.id);
+    const values = months.map((_,i)=>{ return meus.slice(i, i+2).reduce((s,p)=>s+p.valor_bruto,0) || Math.round(Math.random()*80+20); });
     const max = Math.max(...values,1);
     return {months, values, max};
   },[pedidos, currentUser]);
@@ -452,7 +452,7 @@ export default function App(){
             </div>
 
             <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(168px,1fr))', gap:12}}>
-              {filteredCatalog.map((m:any)=>(
+              {filteredCatalog.map((m)=>(
                 <div key={m.id} onClick={()=>{ if(!currentUser){ setCadTipo('cliente'); setView('cadastro'); showToast('Cadastre-se para solicitar'); return; } if(currentUser.tipo!=='cliente'){ showToast('Apenas clientes solicitam'); return; } setSelectedMovel(m); setFormData({bairro:'', data:'', horario:'', cidade:currentUser.cidade, servico:'montagem', cupom:''}); }} className="uber-card uber-card-gold" style={{padding:14, cursor:'pointer'}}>
                   <div style={{width:'100%', height:92, background:'linear-gradient(135deg,#141414 0%,#0A0A0A 100%)', borderRadius:12, display:'grid', placeItems:'center', fontSize:26, position:'relative', overflow:'hidden', border:'1px solid #1E1E1E'}}>
                     <span style={{opacity:0.9}}>⬙</span>
@@ -480,7 +480,7 @@ export default function App(){
                 {k:'montagem', label:'Montagem', val:selectedMovel.valores.montagem},
                 {k:'desmontagem', label:'Desmontagem', val:selectedMovel.valores.desmontagem},
                 {k:'completo', label:'Desmontagem + Montagem', val:selectedMovel.valores.completo},
-              ].map((op:any)=>(
+              ].map((op)=>(
                 <label key={op.k} style={{border: formData.servico===op.k?'1.5px solid #FF7A00':'1px solid #2A2A2A', borderRadius:14, padding:14, display:'flex', justifyContent:'space-between', cursor:'pointer', background: formData.servico===op.k?'#1E1E1E':'#141414', boxShadow: formData.servico===op.k?'0 0 0 3px rgba(255,122,0,0.1) inset':''}}>
                   <div><div style={{fontWeight:700, fontSize:13, color:'#FFF'}}>{op.label}</div><div style={{fontSize:11, color:'#6A6A6A', marginTop:2}}>Valor exato com + taxas inclusas</div></div>
                   <div style={{display:'flex', alignItems:'center', gap:12}}><div style={{fontWeight:800, color:'#FF7A00', fontSize:14}}>R$ {op.val}+</div><input type="radio" checked={formData.servico===op.k} onChange={()=>setFormData({...formData, servico:op.k})} style={{accentColor:'#FF7A00'}} /></div>
@@ -613,7 +613,7 @@ export default function App(){
           </div>
 
           <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))', gap:10, marginBottom:16}}>
-            <div className="uber-metric" style={{padding:16}}><div style={{display:'flex', justifyContent:'space-between'}}><span style={{fontSize:11, color:'#6A6A6A', fontWeight:800, letterSpacing:'0.8px'}}>TOTAL</span><span style={{fontSize:10, background:'#1E1E1E', border:'1px solid #2A2A2A', color:'#A0A0A0', borderRadius:100, padding:'3px 8px', fontWeight:700}}>{pedidos.filter((p:any)=>p.cliente_id===currentUser.id).length}</span></div><div style={{fontWeight:800, fontSize:22, marginTop:10, letterSpacing:'-0.6px'}}>{pedidos.filter((p:any)=>p.cliente_id===currentUser.id).length}</div><div style={{fontSize:11, color:'#6A6A6A', marginTop:2}}>Pedidos Black</div></div>
+            <div className="uber-metric" style={{padding:16}}><div style={{display:'flex', justifyContent:'space-between'}}><span style={{fontSize:11, color:'#6A6A6A', fontWeight:800, letterSpacing:'0.8px'}}>TOTAL</span><span style={{fontSize:10, background:'#1E1E1E', border:'1px solid #2A2A2A', color:'#A0A0A0', borderRadius:100, padding:'3px 8px', fontWeight:700}}>{pedidos.filter((p)=>p.cliente_id===currentUser.id).length}</span></div><div style={{fontWeight:800, fontSize:22, marginTop:10, letterSpacing:'-0.6px'}}>{pedidos.filter((p)=>p.cliente_id===currentUser.id).length}</div><div style={{fontSize:11, color:'#6A6A6A', marginTop:2}}>Pedidos Black</div></div>
             <div className="uber-metric" style={{padding:16, borderColor:'#FF7A00'}}><div style={{display:'flex', justifyContent:'space-between'}}><span style={{fontSize:11, color:'#FF7A00', fontWeight:800, letterSpacing:'0.8px'}}>PENDENTES</span><span style={{width:6,height:6, background:'#FF7A00', borderRadius:999, marginTop:4}} className="pulse"></span></div><div style={{fontWeight:800, fontSize:22, marginTop:10, color:'#FF7A00', letterSpacing:'-0.6px'}}>{clienteFinanceiro.pendCount}</div><div style={{fontSize:11, color:'#6A6A6A', marginTop:2}}>Aguardando Black</div></div>
             <div className="uber-metric" style={{padding:16}}><div style={{fontSize:11, color:'#6A6A6A', fontWeight:800, letterSpacing:'0.8px'}}>FINALIZADOS</div><div style={{fontWeight:800, fontSize:22, marginTop:10, color:'#FFF', letterSpacing:'-0.6px'}}>{clienteFinanceiro.finalCount}</div><div style={{fontSize:11, color:'#6A6A6A', marginTop:2}}>Concluídos</div></div>
             <div className="uber-metric" style={{padding:16, background:'#FF7A00'}}><div style={{fontSize:11, color:'#000', fontWeight:800, letterSpacing:'0.8px'}}>CUPONS</div><div style={{fontWeight:800, fontSize:20, marginTop:10, color:'#000', letterSpacing:'-0.5px'}}>{cupons.length} ativos</div><div style={{fontSize:11, color:'rgba(0,0,0,0.6)', marginTop:2}}>Economia Black</div></div>
@@ -634,7 +634,7 @@ export default function App(){
 
           {tab==='pendente' && (
             <div style={{marginTop:16, display:'grid', gap:12}}>
-              {pedidos.filter((p:any)=>p.cliente_id===currentUser.id && ['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).map((p:any)=>{
+              {pedidos.filter((p)=>p.cliente_id===currentUser.id && ['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).map((p)=>{
                 const isAceito = p.status==='ACEITO';
                 return (
                 <div key={p.id} className="uber-card" style={{padding:16, display:'flex', gap:14, borderLeft:`3px solid ${isAceito?'#00FF88': p.status==='AGUARDANDO_PAGAMENTO'?'#FF7A00':'#3A3A3A'}`}}>
@@ -652,13 +652,13 @@ export default function App(){
                   </div>
                 </div>
               )})}
-              {pedidos.filter((p:any)=>p.cliente_id===currentUser.id && ['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).length===0 && <div className="uber-card" style={{padding:28, textAlign:'center', color:'#6A6A6A', fontSize:13}}>Nenhum pedido pendente • Vá ao catálogo Black 77 móveis.</div>}
+              {pedidos.filter((p)=>p.cliente_id===currentUser.id && ['AGUARDANDO_PAGAMENTO','COMPROVANTE_ENVIADO','PROCURANDO_MONTADOR','ACEITO'].includes(p.status)).length===0 && <div className="uber-card" style={{padding:28, textAlign:'center', color:'#6A6A6A', fontSize:13}}>Nenhum pedido pendente • Vá ao catálogo Black 77 móveis.</div>}
             </div>
           )}
 
           {tab==='finalizados' && (
             <div style={{marginTop:16, display:'grid', gap:10}}>
-              {pedidos.filter((p:any)=>p.cliente_id===currentUser.id && p.status==='FINALIZADO').map((p:any)=>(
+              {pedidos.filter((p)=>p.cliente_id===currentUser.id && p.status==='FINALIZADO').map((p)=>(
                 <div key={p.id} className="uber-card" style={{padding:16, borderLeft:'3px solid #00FF88', display:'flex', gap:14, alignItems:'center'}}>
                   <div style={{width:48,height:48, borderRadius:12, background:'#0A0A0A', border:'1px solid #1E1E1E', display:'grid', placeItems:'center', color:'#00FF88'}}>✓</div>
                   <div><div style={{fontWeight:700, fontSize:13}}>#{p.numero} • {p.movel_nome}</div><div style={{fontSize:12, color:'#6A6A6A', marginTop:3}}>Finalizado por {p.montador_nome||'montador'} • R$ {p.valor_bruto} • {p.cidade} • Black</div></div>
@@ -677,7 +677,7 @@ export default function App(){
               <div className="uber-card" style={{padding:18}}>
                 <div style={{fontWeight:800, fontSize:12, marginBottom:14, letterSpacing:'0.6px', color:'#A0A0A0'}}>GRÁFICO BLACK • VALORES POR PERÍODO</div>
                 <div style={{display:'flex', alignItems:'end', gap:8, height:110}}>
-                  {clienteChart.values.map((v:any,i:number)=>(
+                  {clienteChart.values.map((v,i:number)=>(
                     <div key={i} style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', gap:8}}>
                       <div style={{fontSize:10, fontWeight:800, color:'#FF7A00'}}>R${v}</div>
                       <div style={{width:'100%', background:'#FF7A00', borderRadius:'8px 8px 4px 4px', height:`${(v/clienteChart.max)*80+14}px`}}></div>
@@ -688,7 +688,7 @@ export default function App(){
               </div>
               <div className="uber-card" style={{padding:16}}>
                 <div style={{fontWeight:800, fontSize:12, marginBottom:12, letterSpacing:'0.6px', color:'#A0A0A0'}}>DETALHE POR PEDIDO BLACK</div>
-                {pedidos.filter((p:any)=>p.cliente_id===currentUser.id).map((p:any)=>(
+                {pedidos.filter((p)=>p.cliente_id===currentUser.id).map((p)=>(
                   <div key={p.id} style={{display:'flex', justifyContent:'space-between', fontSize:12, padding:'10px 0', borderBottom:'1px solid #1E1E1E', color:'#A0A0A0'}}><span>#{p.numero} {p.movel_nome} • {p.status}</span><span style={{fontWeight:800, color:'#FFF'}}>R$ {p.valor_bruto}</span></div>
                 ))}
               </div>
@@ -697,7 +697,7 @@ export default function App(){
 
           {tab==='cupons' && (
             <div style={{marginTop:16, display:'grid', gap:12}}>
-              {cupons.map((c:any)=>(
+              {cupons.map((c)=>(
                 <div key={c.id} style={{background:'#111111', borderRadius:16, padding:16, display:'flex', justifyContent:'space-between', alignItems:'center', border:'1px dashed #FF7A00', position:'relative', overflow:'hidden'}}>
                   <div style={{display:'flex', gap:12, alignItems:'center'}}>
                     <div style={{width:42,height:42, borderRadius:12, background:'#FF7A00', display:'grid', placeItems:'center', color:'#000', fontSize:18, fontWeight:800}}>◈</div>
@@ -727,7 +727,7 @@ export default function App(){
                       ◫ Foto galeria 80×80
                       <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>{
                         const f=e.target.files?.[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>{
-                          const url=ev.target?.result; const upd={...currentUser, foto_perfil:url}; setCurrentUser(upd); setUsuarios((prev:any)=>prev.map((u:any)=>u.id===currentUser.id? upd: u)); showToast('Foto perfil atualizada! Black'); playNotification('accept');
+                          const url=ev.target?.result; const upd={...currentUser, foto_perfil:url}; setCurrentUser(upd); setUsuarios((prev)=>prev.map((u)=>u.id===currentUser.id? upd: u)); showToast('Foto perfil atualizada! Black'); playNotification('accept');
                         }; r.readAsDataURL(f);
                       }}/>
                     </label>
@@ -761,7 +761,7 @@ export default function App(){
 
           {tab==='pendentes' && (
             <div style={{marginTop:16, display:'grid', gap:12}}>
-              {pedidos.filter((p:any)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).map((p:any)=>(
+              {pedidos.filter((p)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).map((p)=>(
                 <div key={p.id} className="uber-card" style={{padding:16, display:'flex', gap:14, borderLeft:'3px solid #FF7A00'}}>
                   <div style={{width:80,height:80, borderRadius:14, background:'#0A0A0A', overflow:'hidden', flexShrink:0, border:'1px solid #1E1E1E', display:'grid', placeItems:'center'}}>
                     {p.fotos?.[0]? <img src={p.fotos[0]} style={{width:'100%',height:'100%', objectFit:'cover'}}/> : <span style={{fontSize:26, color:'#2A2A2A'}}>⬙</span>}
@@ -780,13 +780,13 @@ export default function App(){
                   </div>
                 </div>
               ))}
-              {pedidos.filter((p:any)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).length===0 && <div className="uber-card" style={{padding:28, textAlign:'center', color:'#6A6A6A', fontSize:13}}>Nenhum pedido pendente em {currentUser.cidade_atende} • Fique Disponível Black 🔊 Triplo beep ativo.</div>}
+              {pedidos.filter((p)=>['PROCURANDO_MONTADOR','COMPROVANTE_ENVIADO'].includes(p.status) && p.cidade===currentUser.cidade_atende).length===0 && <div className="uber-card" style={{padding:28, textAlign:'center', color:'#6A6A6A', fontSize:13}}>Nenhum pedido pendente em {currentUser.cidade_atende} • Fique Disponível Black 🔊 Triplo beep ativo.</div>}
             </div>
           )}
 
           {tab==='finalizados' && (
             <div style={{marginTop:16, display:'grid', gap:10}}>
-              {pedidos.filter((p:any)=>p.montador_id===currentUser.id && p.status==='FINALIZADO').map((p:any)=>(
+              {pedidos.filter((p)=>p.montador_id===currentUser.id && p.status==='FINALIZADO').map((p)=>(
                 <div key={p.id} className="uber-card" style={{padding:16, borderLeft:'3px solid #00FF88', display:'flex', gap:14, alignItems:'center'}}>
                   <div style={{width:48,height:48, borderRadius:12, background:'#0A0A0A', border:'1px solid #1E1E1E', display:'grid', placeItems:'center', color:'#00FF88'}}>✓</div>
                   <div><div style={{fontWeight:700, fontSize:13}}>#{p.numero} • {p.movel_nome} • {p.cidade} • Black</div><div style={{fontSize:12, color:'#6A6A6A', marginTop:3}}>Cliente {p.cliente_nome} • Recebeu R$ {p.valor_liquido} • Black sonora</div></div>
@@ -804,7 +804,7 @@ export default function App(){
               <div className="uber-card" style={{padding:18}}>
                 <div style={{fontWeight:800, fontSize:13, letterSpacing:'-0.2px'}}>Total geral Black • R$ {montadorFinanceiro.total}</div>
                 <div style={{marginTop:14, display:'grid', gap:8}}>
-                  {montadorFinanceiro.lista.map((p:any)=>(
+                  {montadorFinanceiro.lista.map((p)=>(
                     <div key={p.id} style={{display:'flex', justifyContent:'space-between', fontSize:12, padding:'12px', borderRadius:12, background: p.status==='FINALIZADO'?'#0A0A0A':'#141414', border:`1px solid ${p.status==='FINALIZADO'?'#1E1E1E':'#2A2A2A'}`, color:'#A0A0A0'}}><span>#{p.numero} {p.movel_nome} • {p.status} • {p.cidade}</span><span style={{fontWeight:800, color:'#FFF'}}>R$ {p.valor_liquido}</span></div>
                   ))}
                 </div>
@@ -822,7 +822,7 @@ export default function App(){
             <p style={{fontSize:11, color:'#6A6A6A', marginTop:4}}>Acesso invisível premium • Uber Black</p>
             <form onSubmit={e=>{
               e.preventDefault(); const fd=new FormData(e.target); const login=fd.get('login'); const senha=fd.get('senha');
-              if((login==='AndreSousa84' && senha==='Contato@2026SP') || (login==='andre@contatocertosp.com.br' && senha==='Contato@2026SP')){ setView('admin'); setTab('pedidos'); const adm = usuarios.find((u:any)=>u.tipo==='admin'); if(adm) setCurrentUser(adm); playNotification('accept'); } else showToast('Credenciais inválidas');
+              if((login==='AndreSousa84' && senha==='Contato@2026SP') || (login==='andre@contatocertosp.com.br' && senha==='Contato@2026SP')){ setView('admin'); setTab('pedidos'); const adm = usuarios.find((u)=>u.tipo==='admin'); if(adm) setCurrentUser(adm); playNotification('accept'); } else showToast('Credenciais inválidas');
             }} style={{marginTop:16, display:'grid', gap:10}}>
               <input name="login" placeholder="Login Black" className="uber-input" style={{padding:12}}/>
               <input name="senha" type="password" placeholder="Senha Black" className="uber-input" style={{padding:12}}/>
@@ -849,12 +849,12 @@ export default function App(){
 
           {tab==='pedidos' && (
             <div style={{display:'grid', gap:10}}>
-              {pedidos.map((p:any)=>(
+              {pedidos.map((p)=>(
                 <div key={p.id} className="uber-card" style={{padding:16, fontSize:12, borderLeft:`3px solid ${p.status==='FINALIZADO'?'#00FF88': p.status==='ACEITO'?'#FFF':'#FF7A00'}`}}>
                   <div style={{display:'flex', justifyContent:'space-between', flexWrap:'wrap', gap:10, alignItems:'center'}}>
                     <div style={{display:'flex', gap:10, alignItems:'center'}}><div style={{width:44,height:44, borderRadius:12, background:'#0A0A0A', display:'grid', placeItems:'center', overflow:'hidden', border:'1px solid #1E1E1E'}}>{p.fotos?.[0]? <img src={p.fotos[0]} style={{width:'100%',height:'100%', objectFit:'cover'}}/> : <span style={{color:'#2A2A2A'}}>⬙</span>}</div><div><b style={{color:'#FFF', letterSpacing:'-0.2px'}}>#{p.numero} {p.movel_nome} • {p.cidade} • R$ {p.valor_bruto} (líq R$ {p.valor_liquido})</b><div style={{marginTop:3}}><span style={{background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:100, padding:'2px 8px', fontSize:10, fontWeight:800, letterSpacing:'0.5px', color:p.status==='FINALIZADO'?'#00FF88':'#A0A0A0'}}>{p.status}</span></div></div></div>
                     <div style={{display:'flex', gap:8}}>
-                      <button onClick={()=>{ const upd=pedidos.map((x:any)=> x.id===p.id? {...x, status:'PROCURANDO_MONTADOR'}:x); setPedidos(upd); playNotification('accept'); showToast('Pagamento confirmado Black com som'); }} style={{background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:'8px 12px', fontWeight:700, color:'#A0A0A0', fontSize:11}}>Confirmar Pag</button>
+                      <button onClick={()=>{ const upd=pedidos.map((x)=> x.id===p.id? {...x, status:'PROCURANDO_MONTADOR'}:x); setPedidos(upd); playNotification('accept'); showToast('Pagamento confirmado Black com som'); }} style={{background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:'8px 12px', fontWeight:700, color:'#A0A0A0', fontSize:11}}>Confirmar Pag</button>
                       <button onClick={()=>finalizarPedido(p.id)} style={{background:'#FFF', color:'#000', borderRadius:10, padding:'8px 12px', fontWeight:800, fontSize:11}}>Finalizar Black</button>
                     </div>
                   </div>
@@ -867,7 +867,7 @@ export default function App(){
 
           {tab==='usuarios' && (
             <div style={{display:'grid', gap:10}}>
-              {usuarios.map((u:any)=>(
+              {usuarios.map((u)=>(
                 <div key={u.id} className="uber-card" style={{padding:16, display:'flex', justifyContent:'space-between', alignItems:'center', gap:12}}>
                   <div style={{display:'flex', gap:12, alignItems:'center'}}>
                     <div style={{width:48,height:48, borderRadius:14, background: u.tipo==='admin'?'#FFF': u.tipo==='montador'?'#FF7A00':'#1A1A1A', color: u.tipo==='admin'?'#000': u.tipo==='montador'?'#000':'#A0A0A0', display:'grid', placeItems:'center', fontWeight:800, overflow:'hidden', border:'1px solid #2A2A2A'}}>
@@ -879,8 +879,8 @@ export default function App(){
                     </div>
                   </div>
                   <div style={{display:'flex', gap:6}}>
-                    <button onClick={()=>{ const upd=usuarios.map((x:any)=> x.id===u.id? {...x, status: x.status==='BLOQUEADO'?'ATIVO':'BLOQUEADO'}:x); setUsuarios(upd); playNotification('new'); }} style={{background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:'8px 10px', fontSize:11, fontWeight:700, color:'#A0A0A0'}}>{u.status==='BLOQUEADO'?'Desbloquear':'Bloquear'}</button>
-                    <button onClick={()=>{ if(confirm('Excluir usuário Black?')) { setUsuarios(usuarios.filter((x:any)=>x.id!==u.id)); playNotification('new'); } }} style={{background:'#1A1A1A', border:'1px solid #FF4444', color:'#FF4444', borderRadius:10, padding:'8px 10px', fontSize:11, fontWeight:800}}>Excluir</button>
+                    <button onClick={()=>{ const upd=usuarios.map((x)=> x.id===u.id? {...x, status: x.status==='BLOQUEADO'?'ATIVO':'BLOQUEADO'}:x); setUsuarios(upd); playNotification('new'); }} style={{background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:10, padding:'8px 10px', fontSize:11, fontWeight:700, color:'#A0A0A0'}}>{u.status==='BLOQUEADO'?'Desbloquear':'Bloquear'}</button>
+                    <button onClick={()=>{ if(confirm('Excluir usuário Black?')) { setUsuarios(usuarios.filter((x)=>x.id!==u.id)); playNotification('new'); } }} style={{background:'#1A1A1A', border:'1px solid #FF4444', color:'#FF4444', borderRadius:10, padding:'8px 10px', fontSize:11, fontWeight:800}}>Excluir</button>
                   </div>
                 </div>
               ))}
@@ -904,10 +904,10 @@ export default function App(){
                 </form>
               </div>
               <div style={{display:'grid', gap:10}}>
-                {cupons.map((c:any)=>(
+                {cupons.map((c)=>(
                   <div key={c.id} className="uber-card" style={{padding:16, display:'flex', justifyContent:'space-between', alignItems:'center', border:'1px dashed #FF7A00'}}>
                     <div style={{display:'flex', gap:10, alignItems:'center'}}><div style={{width:38,height:38, borderRadius:10, background:'#FF7A00', color:'#000', display:'grid', placeItems:'center', fontWeight:800}}>◈</div><div><b style={{letterSpacing:'-0.2px'}}>{c.codigo}</b> • {c.desconto}{c.tipo} • Val {c.validade} • Limite {c.limite} • Black</div></div>
-                    <button onClick={()=>{setCupons(cupons.filter((x:any)=>x.id!==c.id)); playNotification('new');}} style={{background:'#1A1A1A', border:'1px solid #FF4444', borderRadius:10, padding:'8px 12px', fontSize:11, fontWeight:700, color:'#FF4444'}}>Excluir</button>
+                    <button onClick={()=>{setCupons(cupons.filter((x)=>x.id!==c.id)); playNotification('new');}} style={{background:'#1A1A1A', border:'1px solid #FF4444', borderRadius:10, padding:'8px 12px', fontSize:11, fontWeight:700, color:'#FF4444'}}>Excluir</button>
                   </div>
                 ))}
               </div>
@@ -925,7 +925,7 @@ export default function App(){
               <div className="uber-card" style={{padding:18}}>
                 <div style={{fontWeight:800, fontSize:12, marginBottom:14, display:'flex', justifyContent:'space-between', letterSpacing:'0.6px', color:'#A0A0A0'}}><span>DETALHE POR MONTADOR BLACK • A RECEBER</span><span style={{fontSize:10, background:'#1A1A1A', border:'1px solid #2A2A2A', borderRadius:100, padding:'3px 8px'}}>SONORA BLACK</span></div>
                 {Object.entries(adminFinanceiro.porMontador).map(([id, d])=>{
-                  const max = Math.max(...Object.values(adminFinanceiro.porMontador).map((x:any)=>x.total),1);
+                  const max = Math.max(...Object.values(adminFinanceiro.porMontador).map((x)=>x.total),1);
                   const pct = Math.round((d.total/max)*100);
                   return <div key={id} style={{marginBottom:14}}><div style={{display:'flex', justifyContent:'space-between', fontSize:12, marginBottom:6}}><span style={{fontWeight:700, color:'#FFF'}}>{d.nome} • {d.count} pedidos • Black</span><span style={{fontWeight:800, color:'#FF7A00'}}>R$ {d.total}</span></div><div style={{height:8, background:'#0A0A0A', borderRadius:20, overflow:'hidden', border:'1px solid #1E1E1E'}}><div style={{height:'100%', width:`${pct}%`, background:'#FF7A00', borderRadius:20}}></div></div></div>;
                 })}
